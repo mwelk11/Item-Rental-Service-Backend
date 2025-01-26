@@ -1,8 +1,9 @@
 "use strict";
 /**
  * Entry point to our application. This file creates a node server and sets up routing using express.js.
- * We specify two middlewares: the express provided JSON parser to parse our request bodies, and an error handler
- * to propogate errors back to the client. Core business logic for handling items happens in item-service.ts
+ * We specify three middlewares: the express provided JSON parser to parse our request bodies,
+ * a validator using our openapi spec, and an error handler to propogate errors back to the client.
+ * Core business logic for handling items happens in item-service.ts.
  */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -59,7 +60,7 @@ app.post('/item', (req, res) => {
     res.status(200).send("OK");
 });
 app.get('/item', (req, res) => {
-    // All requests are verified using OpenApiValidator against the schema defined in openapi.yml.
+    // All requests are validated using OpenApiValidator against the schema defined in openapi.yml.
     // It is safe to typecast here b/c the input has already been validated.
     const name = req.query.name;
     const startPrice = req.query.startPrice;

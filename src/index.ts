@@ -1,7 +1,8 @@
 /**
  * Entry point to our application. This file creates a node server and sets up routing using express.js.
- * We specify two middlewares: the express provided JSON parser to parse our request bodies, and an error handler
- * to propogate errors back to the client. Core business logic for handling items happens in item-service.ts
+ * We specify three middlewares: the express provided JSON parser to parse our request bodies,
+ * a validator using our openapi spec, and an error handler to propogate errors back to the client.
+ * Core business logic for handling items happens in item-service.ts.
  */
 
 import express, {
@@ -35,7 +36,7 @@ app.post('/item', (req: Request, res: Response) => {
 });
 
 app.get('/item', (req: Request, res: Response) => {
-    // All requests are verified using OpenApiValidator against the schema defined in openapi.yml.
+    // All requests are validated using OpenApiValidator against the schema defined in openapi.yml.
     // It is safe to typecast here b/c the input has already been validated.
     const name: string = req.query.name as string;
     const startPrice: number = req.query.startPrice as unknown as number;
