@@ -1,7 +1,6 @@
 # Item Rental Service
 
 This is a backend service using Typescript, node.js, and express.js. This is a simple app that stores all items in memory.
-This obviously will not scale to a large user base. I will discuss how we can scale this in the "scaling" section below.
 
 ## API's
 

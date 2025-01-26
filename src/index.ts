@@ -10,12 +10,8 @@ import express, {
     Response,
     NextFunction
 } from 'express';
-import {
-    body,
-    query,
-    validationResult
-} from 'express-validator';
 import ItemService from './item-service';
+import * as OpenApiValidator from "express-openapi-validator";
 
 const app: Express = express();
 const port = 3000;
@@ -23,69 +19,38 @@ const itemService = new ItemService();
 
 app.use(express.json());
 
-app.post('/item', [
-    body('name').notEmpty().withMessage('name is required').isString().withMessage('name must be a string'),
-    body('description').notEmpty().withMessage('description is required').isString().withMessage('description must be a string'),
-    body('pricePerDay').notEmpty().withMessage('pricePerDay is required').isNumeric().withMessage('pricePerDay must be a number')
-], (req: Request, res: Response) => {
-    const result = validationResult(req);
-    if (!result.isEmpty()) {
-        res.status(400).json({ errors: result.array() });
-        return;
-    }
+app.use(
+    OpenApiValidator.middleware({
+        apiSpec: './openapi.yml',
+        validateRequests: true,
+        validateResponses: true,
+    })
+);
 
+app.post('/item', (req: Request, res: Response) => {
     const { name, description, pricePerDay } = req.body;
     itemService.addItem(name, description, pricePerDay);
 
     res.status(200).send("OK");
 });
 
-app.get('/item', [
-    query('name').optional().isString().withMessage('Name must be a string'),
-    query('startPrice').optional().isNumeric().withMessage('startPrice must be a number'),
-    query('endPrice').optional().isNumeric().withMessage('endPrice must be a number'),
-], (req: Request, res: Response) => {
-    const result = validationResult(req);
-    if (!result.isEmpty()) {
-        res.status(400).json({ errors: result.array() });
-        return;
-    }
+app.get('/item', (req: Request, res: Response) => {
+    // All requests are verified using OpenApiValidator against the schema defined in openapi.yml.
+    // It is safe to typecast here b/c the input has already been validated.
+    const name: string = req.query.name as string;
+    const startPrice: number = req.query.startPrice as unknown as number;
+    const endPrice: number = req.query.endPrice as unknown as number;
 
-    const { name, startPrice, endPrice } = req.query;
-
-    // I wouldn't normally typecast like this, but I've spent too much time trying to debug it for the purposes of this assessment
-    // I have already verified the input using express-validator above. I know that the query params are strings and numbers at this point
-    res.send(itemService.getItems(
-        name as string,
-        startPrice as unknown as number,
-        endPrice as unknown as number)
-    );
+    res.send(itemService.getItems(name, startPrice, endPrice));
 });
 
-app.post('/item/rent', [
-    body('name').notEmpty().withMessage('name is required').isString().withMessage('name must be a string'),
-    body('startDate').notEmpty().withMessage('startDate is required').isDate().withMessage('startDate must be a date'),
-    body('endDate').notEmpty().withMessage('endDate is required').isDate().withMessage('endDate must be a date')
-], (req: Request, res: Response) => {
-    const result = validationResult(req);
-    if (!result.isEmpty()) {
-        res.status(400).json({ errors: result.array() });
-        return;
-    }
-
+app.post('/item/rent', (req: Request, res: Response) => {
     const { name, startDate, endDate } = req.body;
     itemService.rentItem(name, startDate, endDate);
     res.status(200).send("OK");
 });
 
-app.post('/item/return', body('name').notEmpty().withMessage('name is required').isString().withMessage('name must be a string'),
-(req: Request, res: Response) => {
-    const result = validationResult(req);
-    if (!result.isEmpty()) {
-        res.status(400).json({ errors: result.array() });
-        return;
-    }
-
+app.post('/item/return', (req: Request, res: Response) => {
     const name: string = req.body.name;
     itemService.returnItem(name);
     res.status(200).send("OK");

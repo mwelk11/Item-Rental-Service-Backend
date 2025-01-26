@@ -1,5 +1,5 @@
 {
-  "name": "rental-platform",
+  "name": "item-rental-api",
   "version": "1.0.0",
   "description": "backend API for a platform where users can rent out items",
   "main": "dist/src/index.js",
@@ -12,7 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.2",
-    "express-validator": "^7.2.1"
+    "express-openapi-validator": "^5.4.2"
   },
   "devDependencies": {
     "@types/chai": "^5.0.1",

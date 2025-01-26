@@ -1,0 +1,135 @@
+openapi: 3.0.3
+info:
+  title: item-rental-api
+  description: backend API for a platform where users can rent out items
+  version: 1.0.0
+paths:
+  /item:
+    post:
+      summary: List an item for rent.
+      description: Adds a new item to the inventory and makes it available for rent.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - pricePerDay
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                pricePerDay:
+                  type: number
+      responses:
+        '200':
+          description: Item added successfully.
+        '400':
+          description: Invalid input provided.
+        '500':
+          description: Server error.
+    get:
+      summary: Get a list of items
+      description: Get a list of items. Can be filtered by query parameters.
+      parameters:
+        - name: name
+          in: query
+          description: Get a specific item by name
+          schema:
+            type: string
+        - name: startPrice
+          in: query
+          description: Filter items with a price per day greater than or equal to this value.
+          schema:
+            type: number
+        - name: endPrice
+          in: query
+          description: Filter items with a price per day less than or equal to this value.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: List of items retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+        '400':
+          description: Invalid input provided.
+        '500':
+          description: Server error.
+  /item/rent:
+    post:
+      summary: Rent an item
+      description: Marks an item as rented for a specified date range.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - startDate
+                - endDate
+              properties:
+                name:
+                  type: string
+                startDate:
+                  type: string
+                  format: date
+                endDate:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: Item rented successfully.
+        '400':
+          description: Invalid input provided.
+        '500':
+          description: Server error.
+  /item/return:
+    post:
+      summary: Return an item
+      description: Marks an item as returned.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Item returned successfully.
+        '400':
+          description: Invalid input provided.
+        '500':
+          description: Server error.
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        pricePerDay:
+          type: number
+        rentalStartDate:
+          type: string
+          format: date
+        rentalEndDate:
+          type: string
+          format: date
